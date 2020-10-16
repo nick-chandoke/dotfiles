@@ -2,8 +2,6 @@
 ;; This file is loaded by Spacemacs at startup.
 ;; It must be stored in your home directory.
 
-;; TODO: bind to swiper-thing-at-point
-
 (defun dotspacemacs/layers ()
   "Configuration Layers declaration.
 You should not put any user code in this function besides modifying the variable
@@ -90,7 +88,6 @@ values."
                                       ; jupyter-console ;; not found
                                       ;; lisp tools
                                       scheme-complete ;; is this used by company? is it used for racket, ... or which schemes?
-                                      ;; parinfer ;; funny: i never use parinfer. i always use evil % and lisp mode
                                       ;; misc
                                       nyan-mode
                                       vterm
@@ -391,7 +388,7 @@ use for exprs to eval before any packages are loaded; else put in `dotspacemacs/
   "config func for user code. called last in spacemacs' init, after layers."
   ;; see https://www.reddit.com/r/emacs/comments/f3ed3r/how_is_doom_emacs_so_damn_fast/ about optimizing spacemacs' startup
 
-  ;; TODO: change haskell indenting to stop being fucking moronic: no starting new lines with leading space (e.g. when adding a new line above a comment in a top-level statement)
+  ;; TODO: change haskell indenting: don't start new lines with leading space (e.g. when adding a new line above a comment in a top-level statement)
 
   ;;; requires. execute requires after emacs loads
   (require 'org)
@@ -402,7 +399,7 @@ use for exprs to eval before any packages are loaded; else put in `dotspacemacs/
   (define-prefix-command 'ng) ;; prefix key map, "nic's 'g'"
 
   (defun timer-bell () (call-process
-                        "/usr/bin/cvlc" ;; (car (file-expand-wildcards "/nix/store/*-user-environment/bin/cvlc"))
+                        (car (file-expand-wildcards "/nix/store/*-user-environment/bin/cvlc"))
                         nil nil nil "--play-and-exit" "/home/nic/programming/op_finished.wav"))
 
   (defun toggle-timer-bell nil
@@ -427,9 +424,6 @@ use for exprs to eval before any packages are loaded; else put in `dotspacemacs/
               :caller 'nics-counsel-load-theme))
 
   (defun try-theme () ;; nb see http://ergoemacs.org/emacs/elisp_buffer_string.html for similar functions
-    ;; (re-search-backward "[^-_A-Za-z0-9.@]" (line-beginning-position) 'lim)
-    ;; (preceding-char) ;; or (following-char)
-    ;; (let ((ps (bounds-of-thing-at-point 'evil-WORD))))
     (interactive)
     (counsel-load-theme-action (current-word)))
 
@@ -482,8 +476,21 @@ Slightly modified version of evil-find-char."
 
   (defun line-numbers-on () (interactive) (display-line-numbers-mode))
 
+  (when (fboundp 'eww)
+    (defun xah-rename-eww-buffer ()
+      "Rename `eww-mode' buffer so sites open in new page.
+URL `http://ergoemacs.org/emacs/emacs_eww_web_browser.html'
+Version 2017-11-10"
+      (let (($title (plist-get eww-data :title)))
+        (when (eq major-mode 'eww-mode )
+          (if $title
+              (rename-buffer (concat "eww " $title ) t)
+            (rename-buffer "eww" t)))))
+
+    (add-hook 'eww-after-render-hook 'xah-rename-eww-buffer))
+
   ;;; feature enable or disable
-  ;; why in the goddamn motherfucking HELL don't these work?
+  ;; TODO: these don't work. why.
 
   (spacemacs/toggle-smartparens-globally-off)
   (setq flycheck-global-modes nil)  ;; disable flycheck; i'll enable it when i want it
@@ -492,7 +499,7 @@ Slightly modified version of evil-find-char."
   ;; (add-hook 'clojure-mode-hook 'parinfer-mode) ;; parinfer fucks-up a lot
   (smartparens-mode -1)
 
-  ;; (eww-toggle-colors -1) ;; TODO: make this motherfucking piece of shit run WHEN GODDAMN EWW STARTS
+  ;; (eww-toggle-colors -1) ;; TODO: make this run when eww starts
   (nyan-mode 1) (nyan-start-animation)
   (spacemacs/toggle-display-time-on) ; display wall clock in mode line
   (global-git-commit-mode t) ; allow emacs to be my $EDITOR for git commits
@@ -565,6 +572,7 @@ Slightly modified version of evil-find-char."
     (commandp)
     (eww-browse-url "file:///usr/share/doc/racket/ts-reference/index.html"))
 
+  ;; TODO: bind to swiper-thing-at-point
   ;;; keybinds
   (defun keymap+ (&rest bindings)
     (if (stringp (car bindings))
