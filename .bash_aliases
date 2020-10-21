@@ -19,6 +19,7 @@ alias bell="cvlc --play-and-exit $HOME/programming/op_finished.wav 2> /dev/null"
 alias xcpy="xclip -selection clipboard "
 alias xpst="xclip -selection clipboard -o"
 alias dfh="df -h | awk '\$6 = /\/home/ {print \$5}'"
+alias git-show-tracked-files="git ls-tree -r master --name-only"
 
 alias c="clear"
 

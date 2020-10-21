@@ -165,6 +165,8 @@ values."
    dotspacemacs-themes '(;; colorful
                          twilight-anti-bright
                          base16-helios ;; apparently this can't be the 1st in the list; spacemacs can't find it at boot
+                         base16-framer ;; bright text on graphite bg
+                         base16-solarflare ;; like solarized but higher contrast and more cool colors
                          moe-dark
                          base16-unikitty-dark ;; cave w/lighter bg
                          base16-hopscotch
@@ -199,30 +201,31 @@ values."
                          base16-embers ;; variant
 
                          ;; variants of bursting colors
+                         base16-seti ;; popping colors & blue trim on dark gray/blue bg
+
+                         ;; neon
+                         base16-rebecca ;; uv indigo
+
+                         ;; dull
                          base16-ashes ;; cloudy sky
                          base16-onedark ;; but lighter gray bg
                          base16-atelier-cave ;; pale purple bg
                          base16-black-metal-bathory ;; charcoal & amber
-                         base16-bright ;; has red text
                          base16-brushtrees ;; icy white
-                         base16-framer ;; bright text on graphite bg
                          base16-chalk ;; pastels on dark bg
                          base16-material-darker ;; more colorful
                          base16-ia-dark ;; more subdued of framer or chalk
                          base16-harmonic-dark ;; blue bg
-                         base16-helios
                          base16-horizon-dark ;; cool colors helios
                          base16-nova ;; light gray
                          base16-material-palenight ;; purple
                          base16-mocha
                          base16-monokai
-                         base16-rebecca ;; uv indigo
-                         base16-seti ;; popping colors & blue trim on dark gray/blue bg
-                         base16-solarflare
                          base16-tomorrow ;; bright
                          base16-tomorrow-night
 
                          ;; dark & crisp
+                         base16-bright ;; has red text
                          sanityinc-tomorrow-bright)
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
@@ -245,7 +248,7 @@ values."
    dotspacemacs-emacs-leader-key "M-m"
    ;; Major mode leader key is a shortcut key which is the equivalent of
    ;; pressing `<leader> m`. Set it to `nil` to disable it. (default ",")
-   dotspacemacs-major-mode-leader-key "'"
+   dotspacemacs-major-mode-leader-key "'" ;; TODO: doesn't work. apparently it's being overridden by some evil map, but it (codepoint 39) is not in evil-state-normal-map...?!
    ;; Major mode leader key accessible in `emacs state' and `insert state'.
    ;; (default "C-M-m")
    dotspacemacs-major-mode-emacs-leader-key "C-M-m"
@@ -384,11 +387,12 @@ use for exprs to eval before any packages are loaded; else put in `dotspacemacs/
 (defun %chg (a b) (* 100 (/ (- b a) a)))
 
 (defun dotspacemacs/user-config ()
-  (server-mode 1)
   "config func for user code. called last in spacemacs' init, after layers."
+  (server-mode 1)
   ;; see https://www.reddit.com/r/emacs/comments/f3ed3r/how_is_doom_emacs_so_damn_fast/ about optimizing spacemacs' startup
 
   ;; TODO: change haskell indenting: don't start new lines with leading space (e.g. when adding a new line above a comment in a top-level statement)
+  ;; (remove-hook 'haskell-mode company-mode) ;; doesn't work...?
 
   ;;; requires. execute requires after emacs loads
   (require 'org)
@@ -565,6 +569,26 @@ Version 2017-11-10"
 
   (setq nyan-wavy-trail t)
 
+  ;; to define abbrev table for a specific major mode, simply create a table
+  ;; with name <major-mode>-abbrev-table
+  ;; NOTE: abbrevs cannot contain special symbols!
+  (clear-abbrev-table global-abbrev-table)
+  (define-abbrev-table 'global-abbrev-table
+    '(("N" "Natural")
+      ("Z" "Integer")
+      ("hr" "hash-ref")
+      ("HT" "HashTable")
+      ("P" "Pairof")
+      ("L" "Listof")
+      ("S" "String")
+      ("O" "Option")
+      ("PS" "Path-String")
+      ("Sym" "Symbol")))
+  (set-default 'abbrev-mode t)
+  (setq save-abbrevs nil)
+  ;; (abbrev-mode 1)
+
+  ;; TODO: when i get a programmable keyboard, change this to a single keycode.
   (setq-default evil-escape-key-sequence "+;") ;; key sequence to go from insert to normal mode
   (setq-default evil-escape-delay 0.2)
 
@@ -592,7 +616,7 @@ Version 2017-11-10"
            "M-+"          'text-scale-increase
            "M--"          'text-scale-decrease
            "M-="          (cmd (text-scale-set 0))
-           "<C-return>"   'vterm
+           "<C-return>"   'shell
            "<C-S-return>" 'eshell)
   (keymap+ evil-normal-state-local-map  ;; TODO: cf spacemacs/set-leader-keys
            "SPC t n" 'line-numbers-on ;; overrides spacemacs/toggle-line-numbers
@@ -659,9 +683,20 @@ Version 2017-11-10"
 ;; auto-generate custom variable definitions.
 
 (custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ansi-term-color-vector
+   [unspecified "#14191f" "#d15120" "#81af34" "#deae3e" "#7e9fc9" "#a878b5" "#7e9fc9" "#dcdddd"])
  '(compilation-message-face (quote default))
+ '(custom-safe-themes
+   (quote
+    ("db7f422324a763cfdea47abf0f931461d1493f2ecf8b42be87bbbbbabf287bfe" default)))
  '(display-line-numbers-type (quote relative))
  '(evil-want-Y-yank-to-eol nil)
+ '(fci-rule-character-color "#192028")
+ '(fci-rule-color "#192028" t)
  '(flycheck-color-mode-line-face-to-color (quote mode-line-buffer-id))
  '(magit-diff-use-overlays nil)
  '(package-selected-packages
@@ -697,3 +732,9 @@ Version 2017-11-10"
     (unspecified "#272822" "#3C3D37" "#F70057" "#F92672" "#86C30D" "#A6E22E" "#BEB244" "#E6DB74" "#40CAE4" "#66D9EF" "#FB35EA" "#FD5FF0" "#74DBCD" "#A1EFE4" "#F8F8F2" "#F8F8F0")))
  '(window-divider-mode nil))
 
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:family "Hasklig" :foundry "ADBO" :slant normal :weight normal :height 96 :width normal)))))
