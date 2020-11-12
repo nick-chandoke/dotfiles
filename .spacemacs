@@ -44,7 +44,6 @@ values."
      ;; smex ;; how useful is this?
      markdown ;; for when it comes-up
      asciidoc ;; good
-     ;; (python :variables python-test-runner '(pytest nose))
      ;; python
      ivy
      auto-completion
@@ -68,13 +67,24 @@ values."
                                       gruvbox-theme ;; red orange green blue on gray. solarized-gruvbox-dark is gray & yellow-orange
                                       gotham-theme
                                       jazz-theme ;; like trim-yer-beard. orange, red, light blue and green, on gray
-                                      underwater-theme
                                       twilight-anti-bright-theme
-                                      subatomic-theme
                                       moe-theme ;; raindow on gray
-                                      leuven-theme ;; amazing for org mode
+                                      ;; leuven-theme ;; supposedly amazing for org mode
                                       color-theme-sanityinc-tomorrow
-                                      monokai-theme
+                                      flatland-theme ;; projekt202 colors
+
+                                      ;; themes like win98 high contrast
+                                      borland-blue-theme
+                                      cyberpunk-2019-theme
+                                      dark-mint-theme
+
+                                      cherry-blossom-theme ;; black bg w/poppin' violets, roses, & sakura
+                                      constant-theme ;; very cool war machine colors (grays, white & deep cyans)
+                                      green-phosphor-theme ;; bright greens on dark green bg
+                                      green-screen-theme ;; greens on black bg
+                                      minsk-theme ;; very cool! gunmetal-green with good line highlight
+
+                                      display-theme ;; on mode line
 
                                       ;; general tools. commented b/c i never use these.
                                       ;; tldr
@@ -161,68 +171,71 @@ values."
    ;; Default major mode of the scratch buffer
    dotspacemacs-scratch-mode 'emacs-lisp-mode
    ;; List of themes, the first of the list is loaded when spacemacs starts.
-   ;; Press <SPC> T n to cycle to the next theme in the list (works great
-   dotspacemacs-themes '(;; colorful
-                         twilight-anti-bright
-                         base16-helios ;; apparently this can't be the 1st in the list; spacemacs can't find it at boot
+   ;; Press <SPC> T n to cycle to the next theme in the list
+   dotspacemacs-themes '(base16-solarflare
                          base16-framer ;; bright text on graphite bg
-                         base16-solarflare ;; like solarized but higher contrast and more cool colors
+                         base16-helios
                          moe-dark
-                         base16-unikitty-dark ;; cave w/lighter bg
+                         twilight-anti-bright
+                         base16-seti ;; blue trim. dark gray bg. red, yellow, green, orange, cyan, purple
                          base16-hopscotch
+                         base16-atelier-cave ;; pale purple bg
+                         base16-unikitty-dark ;; cave w/lighter bg
+                         base16-material-darker ;; more colorful
+                         base16-brogrammer
+
+                         ;; like win98 high contrast
+                         borland-blue
+                         cyberpunk-2019
+                         dark-mint
 
                          ;; earthy
-                         monokai
+                         base16-monokai
                          gruvbox-dark-hard
                          base16-atelier-estuary
                          jazz
                          base16-atelier-savanna
+                         base16-mocha
+                         minsk ;; gunmetal-green with good line highlight
 
                          ;; blue
                          gotham ;; w/burnt orange
-                         underwater ;; w/green
+                         base16-harmonic-dark ;; blue bg
+                         constant ;; very cool war machine colors (grays, white & deep cyans)
 
                          ;; purpleish
-                         subatomic
+                         base16-material-palenight ;; purple
 
                          ;; bright
                          sanityinc-tomorrow-day
+                         base16-brushtrees ;; icy white
+                         base16-nova ;; light gray. not too bright.
 
-                         ;; inconsolata variants
+                         ;; solarized variants
+                         base16-solarized-dark
+                         base16-flat
                          base16-apathy ;; cyan
                          base16-atlas ;; deep colors. has yellow text
-                         base16-solarized-dark
-
-                         base16-brogrammer
 
                          ;;; trim yr beard variants
                          base16-darktooth ;; warm colors
                          base16-sandcastle ;; blue ash. light bg.
-                         base16-embers ;; variant
-
-                         ;; variants of bursting colors
-                         base16-seti ;; popping colors & blue trim on dark gray/blue bg
+                         base16-embers ;; darker variant
 
                          ;; neon
                          base16-rebecca ;; uv indigo
+                         green-screen ;; greens on black bg
+                         green-phosphor ;; bright greens on dark green bg
 
                          ;; dull
                          base16-ashes ;; cloudy sky
-                         base16-onedark ;; but lighter gray bg
-                         base16-atelier-cave ;; pale purple bg
+                         base16-onedark ;; but lighter gray bg and more colorful text
                          base16-black-metal-bathory ;; charcoal & amber
-                         base16-brushtrees ;; icy white
                          base16-chalk ;; pastels on dark bg
-                         base16-material-darker ;; more colorful
                          base16-ia-dark ;; more subdued of framer or chalk
-                         base16-harmonic-dark ;; blue bg
                          base16-horizon-dark ;; cool colors helios
-                         base16-nova ;; light gray
-                         base16-material-palenight ;; purple
-                         base16-mocha
-                         base16-monokai
-                         base16-tomorrow ;; bright
                          base16-tomorrow-night
+                         cherry-blossom ;; black bg w/poppin' violets, roses, & sakura
 
                          ;; dark & crisp
                          base16-bright ;; has red text
@@ -231,7 +244,7 @@ values."
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
-   dotspacemacs-default-font '("Hasklig"
+   dotspacemacs-default-font '("Mononoki Nerd Font Mono"
                                :size 12
                                :weight normal
                                :width normal
@@ -422,10 +435,12 @@ use for exprs to eval before any packages are loaded; else put in `dotspacemacs/
   (defun nics-counsel-load-theme ()
     "variant of `counsel-load-theme'. uses dotspacemacs-themes instead of (custom-available-themes)"
     (interactive)
-    (ivy-read "Load theme: "
+    (ivy-read "Load one of nic's favorite themes: "
               (mapcar 'symbol-name dotspacemacs-themes)
               :action #'counsel-load-theme-action
               :caller 'nics-counsel-load-theme))
+
+  ;; TODO: make version of nics-counsel-load-theme for fonts. use ivy-read to select a font. select from (x-list-fonts _regex nil (selected-frame)) constrained to names containing normal-normal-normal, mono, and nerd. use set-frame-font to set the font.
 
   (defun try-theme () ;; nb see http://ergoemacs.org/emacs/elisp_buffer_string.html for similar functions
     (interactive)
@@ -509,6 +524,7 @@ Version 2017-11-10"
   (global-git-commit-mode t) ; allow emacs to be my $EDITOR for git commits
   (ido-mode 1)
   (centaur-tabs-mode 1)
+  (display-theme-mode 1)
 
   ;; ensure that dotspacemacs-line-numbers is not mentioned above; it'll screw-up things
   ;; linum mode SUCKS. it's inefficient and makes display unreadable after scaling text (font size)
@@ -574,16 +590,20 @@ Version 2017-11-10"
   ;; NOTE: abbrevs cannot contain special symbols!
   (clear-abbrev-table global-abbrev-table)
   (define-abbrev-table 'global-abbrev-table
-    '(("N" "Natural")
-      ("Z" "Integer")
-      ("hr" "hash-ref")
+    '(("B" "Boolean")
       ("HT" "HashTable")
-      ("P" "Pairof")
       ("L" "Listof")
-      ("S" "String")
+      ("N" "Natural")
       ("O" "Option")
+      ("P" "Pairof")
       ("PS" "Path-String")
-      ("Sym" "Symbol")))
+      ("R" "Real")
+      ("S" "String")
+      ("Sym" "Symbol")
+      ("V" "Vectorof")
+      ("Q" "Exact-Rational")
+      ("Z" "Integer")
+      ("hr" "hash-ref")))
   (set-default 'abbrev-mode t)
   (setq save-abbrevs nil)
   ;; (abbrev-mode 1)
@@ -596,7 +616,7 @@ Version 2017-11-10"
     (commandp)
     (eww-browse-url "file:///usr/share/doc/racket/ts-reference/index.html"))
 
-  ;; TODO: bind to swiper-thing-at-point
+  ;; TODO: bind some key to swiper-thing-at-point
   ;;; keybinds
   (defun keymap+ (&rest bindings)
     (if (stringp (car bindings))
@@ -622,6 +642,7 @@ Version 2017-11-10"
            "SPC t n" 'line-numbers-on ;; overrides spacemacs/toggle-line-numbers
            "SPC T z" 'nics-counsel-load-theme)
   (keymap+ evil-normal-state-map
+           "e" (cmd (evil-forward-WORD-end) (evil-append 1))
            "SPC T c" 'try-theme ;; mnemonic: "try colors"
            "ZZ"  'save-modified-and-close-buffer ;; overrides evil-save-modified-and-close. i want to close only buffer
            "M-f" 'vile-goto-word-by-first-letter
@@ -687,8 +708,11 @@ Version 2017-11-10"
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ansi-color-faces-vector
+   [default bold shadow italic underline bold bold-italic bold])
  '(ansi-term-color-vector
    [unspecified "#14191f" "#d15120" "#81af34" "#deae3e" "#7e9fc9" "#a878b5" "#7e9fc9" "#dcdddd"])
+ '(beacon-color "#d54e53")
  '(compilation-message-face (quote default))
  '(custom-safe-themes
    (quote
@@ -698,10 +722,20 @@ Version 2017-11-10"
  '(fci-rule-character-color "#192028")
  '(fci-rule-color "#192028" t)
  '(flycheck-color-mode-line-face-to-color (quote mode-line-buffer-id))
+ '(frame-background-mode (quote dark))
+ '(highlight-symbol-colors
+   (quote
+    ("#FFF68F" "#B7EB8F" "#76DDBA" "#91D5FF" "#ADC6FF" "#D3ADF7" "#FFADD2" "#FFA39E" "#FFD591")))
  '(magit-diff-use-overlays nil)
+ '(org-src-block-faces
+   (quote
+    (("emacs-lisp"
+      (:background "#F0FFF0"))
+     ("dot"
+      (:foreground "gray50")))))
  '(package-selected-packages
    (quote
-    (base16-helios-theme graphviz-dot-mode faceup base16-theme json-reformat pyvenv org-category-capture alert log4e gntp simple-httpd json-snatcher parent-mode highlight-indentation haml-mode autothemer fringe-helper git-gutter+ pos-tip flx highlight web-completion-data ghc inflections multiple-cursors paredit lv eval-sexp-fu sesman spinner queue pkg-info parseclj a epl powerline bind-map markup-faces auto-complete js2-mode hydra f s dash bind-key magit-popup magit git-commit with-editor transient async projectile org-plus-contrib gotham-theme request markdown-mode git-gutter anzu counsel swiper ivy cider parseedn clojure-mode anaconda-mode pythonic avy popup dash-functional iedit smartparens evil goto-chg undo-tree haskell-mode company flycheck yasnippet skewer-mode csv-mode yapfify yaml-mode xterm-color ws-butler winum which-key wgrep web-mode web-beautify vterm volatile-highlights vi-tilde-fringe uuidgen use-package unfill underwater-theme twittering-mode twilight-bright-theme twilight-anti-bright-theme toc-org tldr tagedit subatomic-theme spaceline smex smeargle slim-mode shell-pop scss-mode scheme-complete sass-mode ripgrep restart-emacs rainbow-delimiters racket-mode pytest pyenv-mode py-isort pug-mode popwin pip-requirements persp-mode pcre2el parinfer paradox orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file nyan-mode neotree mwim multi-term move-text monokai-theme moe-theme mmm-mode material-theme markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint leuven-theme json-mode js2-refactor js-doc jazz-theme ivy-hydra intero indent-guide importmagic hy-mode hungry-delete htmlize hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers helm-make haskell-snippets gruvbox-theme google-translate golden-ratio gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md geiser fuzzy flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eshell-z eshell-prompt-extras esh-help emmet-mode elpy elisp-slime-nav dumb-jump diminish diff-hl define-word cython-mode counsel-projectile company-web company-statistics company-ghci company-ghc company-cabal company-anaconda column-enforce-mode color-theme-sanityinc-tomorrow coffee-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu centaur-tabs auto-yasnippet auto-highlight-symbol auto-compile aggressive-indent afternoon-theme adoc-mode adaptive-wrap ace-window ace-link ac-ispell)))
+    (overcast-theme monokai-pro-theme minsk-theme metalheart-theme melancholy-theme lush-theme laguna-theme lab-themes green-screen-theme green-phosphor-theme green-is-the-new-black-theme github-theme github-modern-theme foggy-night-theme exotica-theme distinguished-theme display-theme dark-mint-theme danneskjold-theme cyberpunk-theme cyberpunk-2019-theme constant-theme cherry-blossom-theme challenger-deep-theme borland-blue-theme autumn-light-theme atom-one-dark-theme atom-dark-theme arc-dark-theme organic-green-theme subatomic256-theme naquadah-theme flatland-theme pine-script-mode base16-helios-theme graphviz-dot-mode faceup base16-theme json-reformat pyvenv org-category-capture alert log4e gntp simple-httpd json-snatcher parent-mode highlight-indentation haml-mode autothemer fringe-helper git-gutter+ pos-tip flx highlight web-completion-data ghc inflections multiple-cursors paredit lv eval-sexp-fu sesman spinner queue pkg-info parseclj a epl powerline bind-map markup-faces auto-complete js2-mode hydra f s dash bind-key magit-popup magit git-commit with-editor transient async projectile org-plus-contrib gotham-theme request markdown-mode git-gutter anzu counsel swiper ivy cider parseedn clojure-mode anaconda-mode pythonic avy popup dash-functional iedit smartparens evil goto-chg undo-tree haskell-mode company flycheck yasnippet skewer-mode csv-mode yapfify yaml-mode xterm-color ws-butler winum which-key wgrep web-mode web-beautify vterm volatile-highlights vi-tilde-fringe uuidgen use-package unfill underwater-theme twittering-mode twilight-bright-theme twilight-anti-bright-theme toc-org tldr tagedit subatomic-theme spaceline smex smeargle slim-mode shell-pop scss-mode scheme-complete sass-mode ripgrep restart-emacs rainbow-delimiters racket-mode pytest pyenv-mode py-isort pug-mode popwin pip-requirements persp-mode pcre2el parinfer paradox orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file nyan-mode neotree mwim multi-term move-text monokai-theme moe-theme mmm-mode material-theme markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint leuven-theme json-mode js2-refactor js-doc jazz-theme ivy-hydra intero indent-guide importmagic hy-mode hungry-delete htmlize hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers helm-make haskell-snippets gruvbox-theme google-translate golden-ratio gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md geiser fuzzy flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eshell-z eshell-prompt-extras esh-help emmet-mode elpy elisp-slime-nav dumb-jump diminish diff-hl define-word cython-mode counsel-projectile company-web company-statistics company-ghci company-ghc company-cabal company-anaconda column-enforce-mode color-theme-sanityinc-tomorrow coffee-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu centaur-tabs auto-yasnippet auto-highlight-symbol auto-compile aggressive-indent afternoon-theme adoc-mode adaptive-wrap ace-window ace-link ac-ispell)))
  '(pdf-view-midnight-colors (quote ("#fdf4c1" . "#1d2021")))
  '(pos-tip-background-color "#FFFACE")
  '(pos-tip-foreground-color "#272822")

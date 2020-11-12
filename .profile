@@ -24,11 +24,6 @@ export EDITOR='emacsclient -a "" -c'
 export LESSOPEN="| src-hilite-lesspipe.sh %s" # src-hilite not installed yet
 export LESS='-Ri'
 
-# IM stuff
-export GTK_IM_MODULE=ibus
-export XMODIFIERS=@im=ibus
-export QT_IM_MODULE=ibus
-
 # taiko settings
 export TAIKO_SKIP_CHROMIUM_DOWNLOAD=true
 export TAIKO_BROWSER_PATH=/nix/store/2q6ky64m7nvv56ihk4fmsnki2prfm5lh-system-path/bin/chromium
@@ -42,6 +37,6 @@ export LUA_CPATH="$HOME/.luarocks/lib/lua/5.3/?.so"
 if [ -e /home/nic/.nix-profile/etc/profile.d/nix.sh ]; then . /home/nic/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
 
 # git settings
-export GIT_EDITOR=vi
+export GIT_EDITOR="$EDITOR" #somewhy this needs to be set; on nixos, at least, it's set to vi somewhere
 
 export WDEV=wlp64s0

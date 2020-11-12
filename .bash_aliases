@@ -5,7 +5,7 @@
 alias diff="diff --color=always"
 alias fluidsynth="fluidsynth -ja jack --server"
 alias grep="grep -E --color=always"
-alias on="ls -Ft --color=always" # TODO: replace with lsd
+alias on="ls -Ft --color=always"
 alias pwgen="pwgen -scnyN1 10"
 alias rm="rm -i"
 alias whois="whois -H"
@@ -48,3 +48,5 @@ alias tracketb="racket -I typed/racket/base"
 alias searchpkgs="searchpkgs -A nixos"
 
 alias copy-playlists-to-ext-disk="sudo copy-playlists-to-ext-disk -m /home/nic/music -p /home/nic/.playlists"
+alias downstairs-trading="xrandr --output HDMI-1 --auto --output HDMI-2 --left-of HDMI-1 --rotate right --auto --output eDP-1 --below HDMI-1 --auto"
+alias upstairs-trading="xrandr --output HDMI-1 --auto --output HDMI-2 --right-of HDMI-1 --rotate left --auto --output eDP-1 --below HDMI-1 --auto"

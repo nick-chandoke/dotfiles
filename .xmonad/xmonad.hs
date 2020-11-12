@@ -125,7 +125,8 @@ import XMonad.Layout.DragPane
 import XMonad.Layout.CenteredMaster
 
 -- contrib other
-import XMonad.Actions.WindowBringer (gotoMenuArgs)
+import XMonad.Util.NamedWindows (getName)
+import XMonad.Actions.WindowBringer (gotoMenuConfig, WindowBringerConfig(..))
 import XMonad.Util.Run
 import XMonad.Actions.FloatKeys
 
@@ -147,6 +148,13 @@ altMask = mod1Mask -- 8
 -- shiftMask = 1 -- already exported by XMonad
 ctrlMask = 4
 superMask = mod4Mask -- 64
+
+getWinCfg :: WindowBringerConfig
+getWinCfg = def { menuArgs = ["-i", "-b", "-l","9", "-p", "goto a window"]
+                , windowTitler = \ws w -> do
+                    wn <- getName w
+                    pure $ W.tag ws ++ " ∋ " ++ show wn
+                }
 
 main :: IO ()
 main = do
@@ -182,8 +190,7 @@ main = do
         --   (ExitSuccess,_,_) -> spawn "xinput set-button-map 'Primax Kensington Eagle Trackball' 3 2 1"
         --   _ -> pure ()
     -- , handleExtraArgs -- b/c editing cmdline args is easier than source
-    , layoutHook = simpleTabbed -- Layout $ Dwindle R CW 1.5 1.1 -- simpleTabbed -- start/default new workspaces on/to this layout
-                 -- TODO: somewhy Dwindle gives error "No instance for (Read (Layout Window))" as required by `xmonad`
+    , layoutHook = Full
     , keys = \(XConfig {modMask, layoutHook, workspaces, terminal}) -> M.fromList $
   -- xmonad-specific functionality
         [( (m .|. modMask, k)
@@ -212,15 +219,15 @@ main = do
         , ((modMask,             xK_Tab), liftIO (readIORef recentWindowsRef) >>= flip whenJust focus . fst)
         -- , ((modMask,               xK_f), broadcastMessage ToggleMonitor *> refresh)
         -- , ((modMask .|. shiftMask, xK_f), withFocused (toggleTag mon_tag))
-        , ((modMask .|. altMask,   xK_f), setLayout (Layout simpleTabbed))
-        , ((modMask .|. altMask .|. shiftMask,   xK_f), setLayout (Layout Full))
+        , ((modMask .|. altMask,   xK_f), setLayout (Layout Full))
+        , ((modMask .|. altMask .|. shiftMask,   xK_f), setLayout (Layout simpleTabbed))
         , ((modMask .|. altMask,   xK_l), menuMapArgs "dmenu" ["-b", "-i", "-p", "change layout"] layouts >>= flip whenJust (setLayout))
-        , ((modMask .|. altMask,   xK_a), gotoMenuArgs ["-i", "-b", "-l","9", "-p", "goto a window"])
+        , ((modMask .|. altMask,   xK_a), gotoMenuConfig getWinCfg)
         , ((modMask,          xK_Return), spawn terminal)
         , ((modMask,               xK_e), spawn "emacs")
         , ((modMask,               xK_g), spawn "gimp")
         , ((modMask .|. shiftMask, xK_i), spawn "tor-browser")
-            -- currently, here on nixos, does nothing. dunno why.
+            -- currently, on nixos, does nothing. dunno why.
             -- "/home/nic/.local/bin/tor-browser_en-US/Browser/start-tor-browser")
         , ((modMask,               xK_i), spawn "firefox")
         , ((modMask,               xK_n), spawn "nitrogen") -- TODO: replace w/better wallpaper util. make one in gracket.
@@ -238,11 +245,12 @@ main = do
         , ((0, 0x1008ff02), spawn "sudo brightnessctl s +10%") -- XF86MonBrightnessUp
         , ((0, 0x1008ff03), spawn "sudo brightnessctl --min-value=1 s 10%-") -- XF86MonBrightnessDown
         , ((0, 0x1008ffb5), liftIO (threadDelay 300) *> runProcessWithInput "rfkill" ["list"] "" >>= (runProcessWithInput "awk" ["BEGIN {NF=\":\"} /^[[:digit:]]:/ {printf($3 \" \");} /Soft/ {if ($3 == \"yes\") {print(\"blocked\")} else {print(\"unblocked\")}}"] >=> alert)) -- XF86RFKill
-  -- mpd. TODO: this should be one daemon that dies on disconnection from mpd, and accepts next, pause, and prev as command-line args
-        , ((modMask .|. shiftMask, xK_Left), spawn "prev_song") -- "cmus-remote -r"
-        , ((modMask .|. shiftMask, xK_Down), spawn "pause_song") -- "cmus-remote -u"
-        , ((modMask .|. shiftMask, xK_Right), spawn "next_song") -- "cmus-remote -n"
-        , ((modMask, xK_BackSpace), spawn "del_playing_song")
+  -- mpd # TODO: this should be one daemon that dies on disconnection from mpd, and accepts next, pause, and prev as command-line args
+        -- that would require me to start & manage connections from within xmonad
+        , ((modMask .|. shiftMask, xK_Left), spawn "song-ctrl prev")
+        , ((modMask .|. shiftMask, xK_Down), spawn "song-ctrl pause")
+        , ((modMask .|. shiftMask, xK_Right), spawn "song-ctrl next")
+        , ((modMask, xK_BackSpace), spawn "song-ctrl del-playing")
         -- , ((0, xK_Menu), pure ()) -- ignore the context menu keypress. experiment w/<http://hackage.haskell.org/package/xmonad-contrib-0.16/docs/XMonad-Actions-KeyRemap.html>. I want to remap a KeySym to a KeyMask. Unsure about that.
         ] <>
         [((modifier .|. modMask, key), windows (f w)) -- workspaces
