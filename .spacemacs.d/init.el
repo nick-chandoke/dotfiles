@@ -80,11 +80,12 @@ values."
 
                                       cherry-blossom-theme ;; black bg w/poppin' violets, roses, & sakura
                                       constant-theme ;; very cool war machine colors (grays, white & deep cyans)
-                                      green-phosphor-theme ;; bright greens on dark green bg
                                       green-screen-theme ;; greens on black bg
                                       minsk-theme ;; very cool! gunmetal-green with good line highlight
 
                                       display-theme ;; on mode line
+
+                                      pretty-mode ;; string display substitution
 
                                       ;; general tools. commented b/c i never use these.
                                       ;; tldr
@@ -172,17 +173,29 @@ values."
    dotspacemacs-scratch-mode 'emacs-lisp-mode
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list
-   dotspacemacs-themes '(base16-solarflare
-                         base16-framer ;; bright text on graphite bg
-                         base16-helios
-                         moe-dark
+   dotspacemacs-themes '(;; special themes
                          twilight-anti-bright
-                         base16-seti ;; blue trim. dark gray bg. red, yellow, green, orange, cyan, purple
-                         base16-hopscotch
-                         base16-atelier-cave ;; pale purple bg
-                         base16-unikitty-dark ;; cave w/lighter bg
-                         base16-material-darker ;; more colorful
                          base16-brogrammer
+
+                         ;; popping colors with focus on purples
+                         base16-atelier-cave ;; darker
+                         base16-unikitty-dark ;; lighter
+
+                         ;; (popping colors on blue bg)
+                         base16-solarized-dark
+                         base16-atlas ;; deep colors. has yellow text
+                         base16-solarflare
+
+                         ;; popping colors on gray bg. all basically variants of the same theme
+                         base16-seti ;; slightly cooler
+                         base16-helios ;; slightly warmer
+                         flatland
+                         base16-material-darker ;; pale but diverse palette
+                         base16-framer
+                         moe-dark ;; chromatic aberration, light colors, italicized comments
+
+                         ;; popping colors on green bg
+                         base16-apathy
 
                          ;; like win98 high contrast
                          borland-blue
@@ -200,7 +213,6 @@ values."
 
                          ;; blue
                          gotham ;; w/burnt orange
-                         base16-harmonic-dark ;; blue bg
                          constant ;; very cool war machine colors (grays, white & deep cyans)
 
                          ;; purpleish
@@ -211,12 +223,6 @@ values."
                          base16-brushtrees ;; icy white
                          base16-nova ;; light gray. not too bright.
 
-                         ;; solarized variants
-                         base16-solarized-dark
-                         base16-flat
-                         base16-apathy ;; cyan
-                         base16-atlas ;; deep colors. has yellow text
-
                          ;;; trim yr beard variants
                          base16-darktooth ;; warm colors
                          base16-sandcastle ;; blue ash. light bg.
@@ -225,7 +231,6 @@ values."
                          ;; neon
                          base16-rebecca ;; uv indigo
                          green-screen ;; greens on black bg
-                         green-phosphor ;; bright greens on dark green bg
 
                          ;; dull
                          base16-ashes ;; cloudy sky
@@ -233,11 +238,11 @@ values."
                          base16-black-metal-bathory ;; charcoal & amber
                          base16-chalk ;; pastels on dark bg
                          base16-ia-dark ;; more subdued of framer or chalk
-                         base16-horizon-dark ;; cool colors helios
+                         base16-horizon-dark ;; ambers, yellow-grays, and cyan (when used with redshift, anyway)
                          base16-tomorrow-night
-                         cherry-blossom ;; black bg w/poppin' violets, roses, & sakura
 
                          ;; dark & crisp
+                         cherry-blossom ;; violets, roses, & sakura
                          base16-bright ;; has red text
                          sanityinc-tomorrow-bright)
    ;; If non nil the cursor color matches the state color in GUI Emacs.
@@ -248,7 +253,7 @@ values."
                                :size 12
                                :weight normal
                                :width normal
-                               :powerline-scale 1)
+                               :powerline-scale 1.2)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The key used for Emacs commands (M-x) (after pressing on the leader key).
@@ -397,8 +402,6 @@ use for exprs to eval before any packages are loaded; else put in `dotspacemacs/
   ; (setq spacemacs-configuration-layer-path "~/programming/spacemacs-layers/")
   )
 
-(defun %chg (a b) (* 100 (/ (- b a) a)))
-
 (defun dotspacemacs/user-config ()
   "config func for user code. called last in spacemacs' init, after layers."
   (server-mode 1)
@@ -406,94 +409,9 @@ use for exprs to eval before any packages are loaded; else put in `dotspacemacs/
 
   ;; TODO: change haskell indenting: don't start new lines with leading space (e.g. when adding a new line above a comment in a top-level statement)
   ;; (remove-hook 'haskell-mode company-mode) ;; doesn't work...?
-
-  ;;; requires. execute requires after emacs loads
-  (require 'org)
-
-  ;;; definitions
-
-  (defmacro cmd (&rest c) "transform a function into a command by prefixing its body with `interactive'. note that this command will not have a name; it'll just say \"lambda\"" `(lambda () (interactive) ,@c))
+  ;; TODO: wtf with this absolute path? how can i cleanly just use or set the load path?
+  (require 'org) (load "/home/nic/.spacemacs.d/funcs.el") ;; execute all `require` statements after emacs loads
   (define-prefix-command 'ng) ;; prefix key map, "nic's 'g'"
-
-  (defun timer-bell () (call-process
-                        (car (file-expand-wildcards "/nix/store/*-user-environment/bin/cvlc"))
-                        nil nil nil "--play-and-exit" "/home/nic/programming/op_finished.wav"))
-
-  (defun toggle-timer-bell nil
-    (interactive)
-    (if (boundp 'org-timer-done-hook)
-        (if (memql 'timer-bell org-timer-done-hook)
-          (progn (message "removed \"timer done\" bell") (remove-hook 'org-timer-done-hook 'timer-bell))
-          (progn (message "added \"timer done\" bell") (add-hook 'org-timer-done-hook 'timer-bell)))
-        (error "org-timer-done-hook does not exist. you need to start a timer first")))
-
-  (defun toggle-cursor-blink nil
-    (interactive)
-    (setq blink-cursor-mode (if (equal 0 (blink-cursor-mode)) t 0)))
-
-  ;; better version of counsel-load-theme: shows only themes from dotspacemacs-themes
-  (defun nics-counsel-load-theme ()
-    "variant of `counsel-load-theme'. uses dotspacemacs-themes instead of (custom-available-themes)"
-    (interactive)
-    (ivy-read "Load one of nic's favorite themes: "
-              (mapcar 'symbol-name dotspacemacs-themes)
-              :action #'counsel-load-theme-action
-              :caller 'nics-counsel-load-theme))
-
-  ;; TODO: make version of nics-counsel-load-theme for fonts. use ivy-read to select a font. select from (x-list-fonts _regex nil (selected-frame)) constrained to names containing normal-normal-normal, mono, and nerd. use set-frame-font to set the font.
-
-  (defun try-theme () ;; nb see http://ergoemacs.org/emacs/elisp_buffer_string.html for similar functions
-    (interactive)
-    (counsel-load-theme-action (current-word)))
-
-  (defun save-modified-and-close-buffer ()
-    (interactive)
-    (when (buffer-modified-p) (save-buffer))
-    (funcall 'spacemacs/kill-this-buffer))
-
-  ;; NB: word boundary regex may need some tweaking
-  (evil-define-motion vile-goto-word-by-first-letter (count char)
-    "Move to the next COUNT'th occurrence of CHAR.
-Movement is restricted to the current line unless `evil-cross-lines' is non-nil.
-Slightly modified version of evil-find-char."
-    :type inclusive
-    (interactive "<c><C>")
-    (setq count (or count 1))
-    (let ((fwd (> count 0))
-          (visual (and evil-respect-visual-line-mode
-                       visual-line-mode)))
-      (setq evil-last-find (list #'vile-goto-word-by-first-letter char fwd))
-      (when fwd (forward-char))
-      (let ((case-fold-search nil))
-        (unless (prog1
-                    (re-search-forward (concat "[^[:alnum:]]" (char-to-string char)) ; modified this line
-                                       (cond (evil-cross-lines
-                                              nil)
-                                             ((and fwd visual)
-                                              (save-excursion
-                                                (end-of-visual-line)
-                                                (point)))
-                                             (fwd
-                                              (line-end-position))
-                                             (visual
-                                              (save-excursion
-                                                (beginning-of-visual-line)
-                                                (point)))
-                                             (t
-                                              (line-beginning-position)))
-                                       t count)
-                  (when fwd (backward-char)))
-          (user-error "Can't find %c" char)))))
-
-  ;; backwards version
-  (evil-define-motion vile-goto-word-by-first-letter-backward (count char)
-    "Move to the previous COUNT'th occurrence of CHAR."
-    :type exclusive
-    (interactive "<c><C>")
-    (vile-goto-word-by-first-letter (- (or count 1)) char)
-    (forward-char 1))
-
-  (defun line-numbers-on () (interactive) (display-line-numbers-mode))
 
   (when (fboundp 'eww)
     (defun xah-rename-eww-buffer ()
@@ -508,15 +426,11 @@ Version 2017-11-10"
 
     (add-hook 'eww-after-render-hook 'xah-rename-eww-buffer))
 
-  ;;; feature enable or disable
-  ;; TODO: these don't work. why.
+  ;; TODO: these feature toggles don't work. why.
 
   (spacemacs/toggle-smartparens-globally-off)
   (setq flycheck-global-modes nil)  ;; disable flycheck; i'll enable it when i want it
-  (add-hook 'racket-mode-hook 'parinfer-mode)
   (add-hook 'racket-mode-hook 'add-lang-specific-repl-bind)
-  ;; (add-hook 'clojure-mode-hook 'parinfer-mode) ;; parinfer fucks-up a lot
-  (smartparens-mode -1)
 
   ;; (eww-toggle-colors -1) ;; TODO: make this run when eww starts
   (nyan-mode 1) (nyan-start-animation)
@@ -525,6 +439,16 @@ Version 2017-11-10"
   (ido-mode 1)
   (centaur-tabs-mode 1)
   (display-theme-mode 1)
+
+  (global-pretty-mode 1)
+  (remove-hook 'prog-mode-hook 'global-prettify-symbols-mode)
+	(remove-hook 'prog-mode-hook 'global-pretty-mode)
+	(remove-hook 'prog-mode-hook 'pretty-mode)
+	;; (add-hook 'prog-mode-hook 'pretty-mode)
+	;; (remove-hook 'prog-mode-hook 'prettify-symbols-mode)
+	(add-hook 'prog-mode-hook 'prettify-symbols-mode)
+  (add-hook 'prog-mode-hook (lambda nil (mapc (lambda (pair) (push pair prettify-symbols-alist))
+                                              '(("compose1" . "→")))))
 
   ;; ensure that dotspacemacs-line-numbers is not mentioned above; it'll screw-up things
   ;; linum mode SUCKS. it's inefficient and makes display unreadable after scaling text (font size)
@@ -612,23 +536,8 @@ Version 2017-11-10"
   (setq-default evil-escape-key-sequence "+;") ;; key sequence to go from insert to normal mode
   (setq-default evil-escape-delay 0.2)
 
-  (defun open-typed-racket-docs () ;; NOTE: this URL is incorrect on nixos
-    (commandp)
-    (eww-browse-url "file:///usr/share/doc/racket/ts-reference/index.html"))
-
   ;; TODO: bind some key to swiper-thing-at-point
   ;;; keybinds
-  (defun keymap+ (&rest bindings)
-    (if (stringp (car bindings))
-        (progn (setq k (pop bindings) f (pop bindings))
-               (while k
-                 (global-set-key (kbd k) f)
-                 (setq k (pop bindings) f (pop bindings))))
-      (let ((m (pop bindings)))
-        (setq k (pop bindings) f (pop bindings))
-        (while k
-          (define-key m (kbd k) f)
-          (setq k (pop bindings) f (pop bindings))))))
 
   (keymap+ "M-t"          'toggle-timer-bell
            "C-x C-e"      'eval-print-last-sexp
@@ -735,7 +644,7 @@ Version 2017-11-10"
       (:foreground "gray50")))))
  '(package-selected-packages
    (quote
-    (overcast-theme monokai-pro-theme minsk-theme metalheart-theme melancholy-theme lush-theme laguna-theme lab-themes green-screen-theme green-phosphor-theme green-is-the-new-black-theme github-theme github-modern-theme foggy-night-theme exotica-theme distinguished-theme display-theme dark-mint-theme danneskjold-theme cyberpunk-theme cyberpunk-2019-theme constant-theme cherry-blossom-theme challenger-deep-theme borland-blue-theme autumn-light-theme atom-one-dark-theme atom-dark-theme arc-dark-theme organic-green-theme subatomic256-theme naquadah-theme flatland-theme pine-script-mode base16-helios-theme graphviz-dot-mode faceup base16-theme json-reformat pyvenv org-category-capture alert log4e gntp simple-httpd json-snatcher parent-mode highlight-indentation haml-mode autothemer fringe-helper git-gutter+ pos-tip flx highlight web-completion-data ghc inflections multiple-cursors paredit lv eval-sexp-fu sesman spinner queue pkg-info parseclj a epl powerline bind-map markup-faces auto-complete js2-mode hydra f s dash bind-key magit-popup magit git-commit with-editor transient async projectile org-plus-contrib gotham-theme request markdown-mode git-gutter anzu counsel swiper ivy cider parseedn clojure-mode anaconda-mode pythonic avy popup dash-functional iedit smartparens evil goto-chg undo-tree haskell-mode company flycheck yasnippet skewer-mode csv-mode yapfify yaml-mode xterm-color ws-butler winum which-key wgrep web-mode web-beautify vterm volatile-highlights vi-tilde-fringe uuidgen use-package unfill underwater-theme twittering-mode twilight-bright-theme twilight-anti-bright-theme toc-org tldr tagedit subatomic-theme spaceline smex smeargle slim-mode shell-pop scss-mode scheme-complete sass-mode ripgrep restart-emacs rainbow-delimiters racket-mode pytest pyenv-mode py-isort pug-mode popwin pip-requirements persp-mode pcre2el parinfer paradox orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file nyan-mode neotree mwim multi-term move-text monokai-theme moe-theme mmm-mode material-theme markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint leuven-theme json-mode js2-refactor js-doc jazz-theme ivy-hydra intero indent-guide importmagic hy-mode hungry-delete htmlize hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers helm-make haskell-snippets gruvbox-theme google-translate golden-ratio gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md geiser fuzzy flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eshell-z eshell-prompt-extras esh-help emmet-mode elpy elisp-slime-nav dumb-jump diminish diff-hl define-word cython-mode counsel-projectile company-web company-statistics company-ghci company-ghc company-cabal company-anaconda column-enforce-mode color-theme-sanityinc-tomorrow coffee-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu centaur-tabs auto-yasnippet auto-highlight-symbol auto-compile aggressive-indent afternoon-theme adoc-mode adaptive-wrap ace-window ace-link ac-ispell)))
+    (pretty-mode overcast-theme monokai-pro-theme minsk-theme metalheart-theme melancholy-theme lush-theme laguna-theme lab-themes green-screen-theme green-phosphor-theme green-is-the-new-black-theme github-theme github-modern-theme foggy-night-theme exotica-theme distinguished-theme display-theme dark-mint-theme danneskjold-theme cyberpunk-theme cyberpunk-2019-theme constant-theme cherry-blossom-theme challenger-deep-theme borland-blue-theme autumn-light-theme atom-one-dark-theme atom-dark-theme arc-dark-theme organic-green-theme subatomic256-theme naquadah-theme flatland-theme pine-script-mode base16-helios-theme graphviz-dot-mode faceup base16-theme json-reformat pyvenv org-category-capture alert log4e gntp simple-httpd json-snatcher parent-mode highlight-indentation haml-mode autothemer fringe-helper git-gutter+ pos-tip flx highlight web-completion-data ghc inflections multiple-cursors paredit lv eval-sexp-fu sesman spinner queue pkg-info parseclj a epl powerline bind-map markup-faces auto-complete js2-mode hydra f s dash bind-key magit-popup magit git-commit with-editor transient async projectile org-plus-contrib gotham-theme request markdown-mode git-gutter anzu counsel swiper ivy cider parseedn clojure-mode anaconda-mode pythonic avy popup dash-functional iedit smartparens evil goto-chg undo-tree haskell-mode company flycheck yasnippet skewer-mode csv-mode yapfify yaml-mode xterm-color ws-butler winum which-key wgrep web-mode web-beautify vterm volatile-highlights vi-tilde-fringe uuidgen use-package unfill underwater-theme twittering-mode twilight-bright-theme twilight-anti-bright-theme toc-org tldr tagedit subatomic-theme spaceline smex smeargle slim-mode shell-pop scss-mode scheme-complete sass-mode ripgrep restart-emacs rainbow-delimiters racket-mode pytest pyenv-mode py-isort pug-mode popwin pip-requirements persp-mode pcre2el parinfer paradox orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file nyan-mode neotree mwim multi-term move-text monokai-theme moe-theme mmm-mode material-theme markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint leuven-theme json-mode js2-refactor js-doc jazz-theme ivy-hydra intero indent-guide importmagic hy-mode hungry-delete htmlize hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers helm-make haskell-snippets gruvbox-theme google-translate golden-ratio gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md geiser fuzzy flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eshell-z eshell-prompt-extras esh-help emmet-mode elpy elisp-slime-nav dumb-jump diminish diff-hl define-word cython-mode counsel-projectile company-web company-statistics company-ghci company-ghc company-cabal company-anaconda column-enforce-mode color-theme-sanityinc-tomorrow coffee-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu centaur-tabs auto-yasnippet auto-highlight-symbol auto-compile aggressive-indent afternoon-theme adoc-mode adaptive-wrap ace-window ace-link ac-ispell)))
  '(pdf-view-midnight-colors (quote ("#fdf4c1" . "#1d2021")))
  '(pos-tip-background-color "#FFFACE")
  '(pos-tip-foreground-color "#272822")
